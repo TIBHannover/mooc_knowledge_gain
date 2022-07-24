@@ -61,9 +61,9 @@ The slides and transcripts are taken from the edX course [Globally Distributed S
 
 The age of acquisition list contains the age of acquisition of over 50.000 words which is provided under this [link](http://crr.ugent.be/archives/806).
 
-The frequency and amount of syllables of words was generated with the help of the [English Lexicon Project]{https://elexicon.wustl.edu/query13/query13.html}. To get the same file select *Freq_KF* and *NSyll*, and *the complete ELP lexicon* to execute the correct query.  
+The frequency and amount of syllables of words was generated with the help of the [English Lexicon Project](https://elexicon.wustl.edu/query13/query13.html). To get the same file select *Freq_KF* and *NSyll*, and *the complete ELP lexicon* to execute the correct query.  
 
-The stopwords which are used during the calculation of the features are from the coreNLP library. This list can be downloaded on [GitHub]{https://github.com/stanfordnlp/CoreNLP/blob/main/data/edu/stanford/nlp/patterns/surface/stopwords.txt}.
+The stopwords which are used during the calculation of the features are from the coreNLP library. This list can be downloaded on [GitHub](https://github.com/stanfordnlp/CoreNLP/blob/main/data/edu/stanford/nlp/patterns/surface/stopwords.txt).
 ## How to use
 Before starting the software download the previous mentioned data and place it on the corresponding positions as explained in the structure overview. Besides, use the same names as the structure is using.
 
