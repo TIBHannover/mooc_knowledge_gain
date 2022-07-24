@@ -1,5 +1,5 @@
+# Predicting Knowledge Gain for MOOC Video Consumption
 This is the official repository for the paper "Predicting Knowledge Gain for MOOC Video Consumption" published at the 23rd International Conference for Artificial Intelligence in Education 2022.
-
 
 The code is divided into three subprojects consisting of feature extraction of source data, feature dataset processing, and Weka evaluation processing.
 ## Feature Extraction
