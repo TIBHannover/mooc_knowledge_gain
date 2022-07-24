@@ -100,7 +100,7 @@ def get_z_values(test):
     """ Loads the knowledge gain of the test values (csv-file) and calculates them into z-values to get a nominal
     distribution. This distribution is used to classify the knowledge gain into one of three knowledge gain classes.
     :param test:
-    :return:
+    :return: z-values of knowledge gain
     """
     test.seek(1)
     reader = csv.reader(test, delimiter=',')
