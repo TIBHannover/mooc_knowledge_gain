@@ -56,25 +56,6 @@ def store_csv(data, name):
         ''.join(['./feature_selection/weka/', name, '.csv']), index=False, encoding='utf-8')
 
 
-'''
-def feature_selection_tree(x_train, x_test, y_train, y_test):
-    tree = ExtraTreesClassifier(n_estimators=500, max_depth=10, min_samples_leaf=2,
-                                random_state=1234)
-    tree = tree.fit(x_train, y_train)
-    result = pd.DataFrame(tree.feature_importance_, columns=['importance'])
-    result = result.sort_values(['importance'], ascending=False)
-    ids = result.index
-    model = SelectFromModel(tree, prefit=True)
-    return model.transform(x_train), model.transform(x_test), x_train.iloc[:, ids].columns
-
-
-def feature_selection_chi(x_train, x_test, y_train, y_test):
-    chi = SelectKBest(chi2).fit_transform(x_train, y_train)
-    result = pd.DataFrame(chi.coef_, columns=['correlation'])
-    print(result)
-'''
-
-
 def scale_data(train_X, test_X):
     scaler = MinMaxScaler()
     scaler.fit(train_X)
@@ -175,21 +156,10 @@ def get_permutation_importance_rfpimp(name, X_train, y_train, X_test, y_test, k,
 
 
 def get_drop_column_importance(name, X_train, y_train, X_test, y_test, k, store=False):
-    # create random feature to identify important ones (threshold-like)
-    # rands_train = np.array([random.uniform(0, 1) for i in range(X_train.shape[0])]).reshape(-1, 1)
-    # rands_test = np.array([random.uniform(0, 1) for i in range(X_test.shape[0])]).reshape(-1, 1)
-    # train_rand_feature = scale_data(rands_train).squeeze()
-    # fi_X_train = copy(X_train)
-    # fi_X_train.insert(X_train.shape[1], "Random", train_rand_feature)
-
-    # test_rand_feature = scale_data(rands_test).squeeze()
-    # fi_X_test = copy(X_test)
-    # fi_X_test.insert(X_test.shape[1], "Random", test_rand_feature)
     model = RandomForestClassifier(max_depth=100, random_state=999)
     fi = dropcol_importances(model, X_train, y_train["Knowledge_Gain_Level"].to_numpy(),
                              X_test, y_test["Knowledge_Gain_Level"].to_numpy())
     fi = fi.iloc[(-fi['Importance']).argsort()]
-    # fi = fi.loc[~(fi == 0).all(axis=1)]  # remove features without importance
     fi = fi.iloc[:, 0]
     # print(fi)
     if store:
@@ -223,8 +193,6 @@ def get_pearson_correlation(name, x_train, x_test, y_train, y_test, k, store=Fal
     # get pearson correlation from x-features to y-classes
     pearson = x_train.corr()['Knowledge_Gain_Level'][:-1]
     pearson = pearson.sort_values(ascending=False)
-    # print(pearson)
-    # print(type(pearson))
     if store:
         store_feature_importance(pearson, name, 'pearson', k)
     return pearson
@@ -274,25 +242,6 @@ def store_avg_importance(name, mean_values, fi_method, data_method):
 
 
 def get_non_relevant_features(data_x, data_y):
-    '''
-    data, pearson_y = copy(data_x), copy(data_y.drop(['Video_ID'], axis=1))
-    data.insert(len(data.columns), 'Knowledge_Gain_Level', pearson_y, True)
-
-    dict_kg = {'Low': 0, 'Moderate': 1, 'High': 2}
-    data.replace(dict_kg, inplace=True)
-    pearson = data.corr()['Knowledge_Gain_Level'][:-1]
-    pearson = pearson.sort_values(ascending=False)
-    previous_amount = len(pearson)
-    pearson.dropna(inplace=True)
-    removed_columns = []
-    non_relevant_features = pearson.index.values.tolist() + ['Video_ID', 'Knowledge_Gain_Level']
-    for column in data.columns:
-        if column not in non_relevant_features:
-            removed_columns.append(column)
-    print(f'Amount of non relevant features is {len(removed_columns)}')
-    print(removed_columns)
-    return removed_columns
-    '''
     old_columns = data_x.columns
     relevant_data_x = copy(data_x.loc[:, (data_x != data_x.iloc[0]).any()])
     removed_columns = [column for column in old_columns if column not in relevant_data_x.columns]
@@ -321,13 +270,9 @@ def create_filtered_sets_best_features(name, fi, x_train, x_test, y_train, y_tes
         max_features = all_features
     # sort by absolute value
     fi = fi.reindex(fi.abs().sort_values(ascending=False).index)
-    # print(fi)
     # create csv-files with maximum amount of features
     for max_feature in max_features:
         features = list(fi[0:max_feature].index)
-        # print(features)
-        # print()
-        # print(f'Create list with max amount of {max_feature} features')
         # store csv-files
         if specific_idx:
             features = features + ['Person_ID']
@@ -408,33 +353,6 @@ def create_embedding_csvs(slide_embd_train, y_train, slide_embd_test, y_test, tr
         ''.join(
             ['./feature_selection/pearson/test/embedding_', str(k + 1), '_', data_method, '_both_embd_test.csv']),
         index=False, encoding='utf-8', quoting=csv.QUOTE_NONNUMERIC)
-
-    ''' merge only the best classification set with embeddings
-    # with slide embedding
-    pd.concat([filtered_train, slide_embd_train, y_train], axis=1).sort_values(by=['Knowledge_Gain_Level'], key=lambda x: x.map(nominal_to_num)).to_csv(''.join(
-        ['./feature_selection/pearson/train/', str(k + 1), '_', 'pearson', '_', str(threshold), '_slide.csv']),
-        index=False, encoding='utf-8')
-    pd.concat([filtered_test, slide_embd_test, y_test], axis=1).sort_values(by=['Knowledge_Gain_Level'], key=lambda x: x.map(nominal_to_num)).to_csv(
-        ''.join(
-            ['./feature_selection/pearson/test/', str(k + 1), '_', 'pearson', '_', str(threshold), '_slide_test.csv']),
-        index=False, encoding='utf-8')
-    # with transcript embedding
-    pd.concat([filtered_train, transcript_embd_train,  y_train], axis=1).sort_values(by=['Knowledge_Gain_Level'], key=lambda x: x.map(nominal_to_num)).to_csv(''.join(
-        ['./feature_selection/pearson/train/', str(k + 1), '_', 'pearson', '_', str(threshold), '_transcript.csv']),
-        index=False, encoding='utf-8')
-    pd.concat([filtered_test, transcript_embd_test, y_test], axis=1).sort_values(by=['Knowledge_Gain_Level'], key=lambda x: x.map(nominal_to_num)).to_csv(
-        ''.join(
-            ['./feature_selection/pearson/test/', str(k + 1), '_', 'pearson', '_', str(threshold), '_transcript_test.csv']),
-        index=False, encoding='utf-8')
-    # with both embeddings
-    pd.concat([filtered_train, slide_embd_train, transcript_embd_train, y_train], axis=1).sort_values(by=['Knowledge_Gain_Level'], key=lambda x: x.map(nominal_to_num)).to_csv(''.join(
-        ['./feature_selection/pearson/train/', str(k + 1), '_', 'pearson', '_', str(threshold), '_both.csv']),
-        index=False, encoding='utf-8')
-    pd.concat([filtered_test, slide_embd_test, transcript_embd_test, y_test], axis=1).sort_values(by=['Knowledge_Gain_Level'], key=lambda x: x.map(nominal_to_num)).to_csv(
-        ''.join(
-            ['./feature_selection/pearson/test/', str(k + 1), '_', 'pearson', '_', str(threshold), '_both_test.csv']),
-        index=False, encoding='utf-8')
-    '''
 
 
 def store_filtered(name, filtered_train, y_train, filtered_test, y_test, specific, k, fi_method, data_method):
@@ -554,10 +472,6 @@ def avg_split(k, name, feature, filter_type, slide_embd, transcript_embd, non_re
     concated = pd.concat(fis)
     mean_values = concated.groupby(concated.index).mean()
     store_avg_importance(name, mean_values, importance_method, 'videos')
-    #if filter_type == "influence":
-    #    for i, set in enumerate(sets):
-    #        create_filtered_sets_influence(name, mean_values, set[0], set[1], set[2], set[3], i, importance_method,
-    #                                       'videos')
 
 
 def data_split(k, name, feature, filter_type, slide_embd, transcript_embd, non_relevant, importance_method):
@@ -606,10 +520,6 @@ def data_split(k, name, feature, filter_type, slide_embd, transcript_embd, non_r
     concated = pd.concat(complete_fi)
     mean_values = concated.groupby(concated.index).mean()
     store_avg_importance(name, mean_values, importance_method, 'persons')
-    #if filter_type == "influence":
-    #    for i, set in enumerate(sets):
-    #        create_filtered_sets_influence(name, mean_values, set[0], set[1], set[2], set[3], i, importance_method,
-    #                                       'persons')
 
 
 def create_csvs_weka(k, name, feature):
@@ -707,23 +617,17 @@ def video_kg_prediction(name, feature, avg_feature, mode='avg'):
             final_pred = z_score_convert(np.mean(y_preds))
         else:
             unique_counts = np.unique(y_preds, return_counts=True)
-            # print(y_preds)
             max_val = unique_counts[1][np.argmax(unique_counts[1])]
             max_entries = []
             for i, value in enumerate(unique_counts[1]):
                 if value == max_val:
-                    # print(unique_counts[0][i])
                     max_entries.append(unique_counts[0][i])
             amount_most = len(max_entries)
-            # print(unique_counts)
-            # print(max_entries)
             if amount_most >= 2:
                 most_id = random.randint(0, amount_most - 1)
                 final_pred = max_entries[most_id]
             else:
                 final_pred = max_entries[0]
-            # print(final_pred)
-            # print()
         y_true.append(video_kg_class)
         y_pred.append(final_pred)
     class_vals = list(precision_recall_fscore_support(y_true, y_pred, average=None, labels=['Low', 'Moderate', 'High']))
