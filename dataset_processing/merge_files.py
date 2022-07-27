@@ -1,6 +1,15 @@
 import sys
+import argparse
 import csv
 import pandas as pd
+
+
+def parse_arguments():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-f', '--folder', type=str, required=False, default='all', help='set the foldername of the dataset')
+    parser.add_argument('-k', '--k_fold', type=int, required=False, default=5, help='set the k for k-fold split')
+    args = parser.parse_args()
+    return args
 
 
 def merge_csv(first, second, result):
@@ -49,31 +58,33 @@ def merge_df(first, second, name):
 
 
 if __name__ == "__main__":
-    for path, end in [('./feature_selection/pearson/train/', ''), ('./feature_selection/pearson/test/', '_test')]:
-        for i in range(5):
+    args = parse_arguments()
+    subfolder = 'avg' if args.folder == 'avg' else 'all'
+    for path, end in [(f'./feature_selection/{subfolder}/train/', ''), (f'./feature_selection/{subfolder}/test/', '_test')]:
+        for i in range(args.k_fold):
             i = i+1
-            '''
-            merge_df(f'{path}all_features_{i}_drop_column_persons_influence_without{end}.csv', f'{path}embedding_{i}_persons_both_embd{end}.csv', f'all_features_{i}_persons_both_embed{end}.csv')
-            merge_df(f'{path}multimedia_features_{i}_drop_column_persons_influence_without{end}.csv', f'{path}embedding_{i}_persons_both_embd{end}.csv', f'multimedia_features_{i}_persons_both_embed{end}.csv')
-            merge_df(f'{path}text_features_{i}_drop_column_persons_influence_without{end}.csv', f'{path}embedding_{i}_persons_both_embd{end}.csv', f'text_features_{i}_persons_both_embed{end}.csv')
+            if subfolder == all:
+                merge_df(f'{path}all_features_{i}_drop_column_persons_influence_without{end}.csv', f'{path}embedding_{i}_persons_both_embd{end}.csv', f'all_features_{i}_persons_both_embed{end}.csv')
+                merge_df(f'{path}multimedia_features_{i}_drop_column_persons_influence_without{end}.csv', f'{path}embedding_{i}_persons_both_embd{end}.csv', f'multimedia_features_{i}_persons_both_embed{end}.csv')
+                merge_df(f'{path}text_features_{i}_drop_column_persons_influence_without{end}.csv', f'{path}embedding_{i}_persons_both_embd{end}.csv', f'text_features_{i}_persons_both_embed{end}.csv')
 
-            merge_df(f'{path}all_features_{i}_drop_column_persons_influence_without{end}.csv', f'{path}embedding_{i}_persons_only_slide{end}.csv', f'all_features_{i}_persons_slides_embed{end}.csv')
-            merge_df(f'{path}multimedia_features_{i}_drop_column_persons_influence_without{end}.csv', f'{path}embedding_{i}_persons_only_slide{end}.csv', f'multimedia_features_{i}_persons_slides_embed{end}.csv')
-            merge_df(f'{path}text_features_{i}_drop_column_persons_influence_without{end}.csv', f'{path}embedding_{i}_persons_only_slide{end}.csv', f'text_features_{i}_persons_slides_embed{end}.csv')
+                merge_df(f'{path}all_features_{i}_drop_column_persons_influence_without{end}.csv', f'{path}embedding_{i}_persons_only_slide{end}.csv', f'all_features_{i}_persons_slides_embed{end}.csv')
+                merge_df(f'{path}multimedia_features_{i}_drop_column_persons_influence_without{end}.csv', f'{path}embedding_{i}_persons_only_slide{end}.csv', f'multimedia_features_{i}_persons_slides_embed{end}.csv')
+                merge_df(f'{path}text_features_{i}_drop_column_persons_influence_without{end}.csv', f'{path}embedding_{i}_persons_only_slide{end}.csv', f'text_features_{i}_persons_slides_embed{end}.csv')
             
-            merge_df(f'{path}all_features_{i}_drop_column_persons_influence_without{end}.csv', f'{path}embedding_{i}_persons_only_transcript{end}.csv', f'all_features_{i}_persons_srt_embed{end}.csv')
-            merge_df(f'{path}multimedia_features_{i}_drop_column_persons_influence_without{end}.csv', f'{path}embedding_{i}_persons_only_transcript{end}.csv', f'multimedia_features_{i}_persons_srt_embed{end}.csv')
-            merge_df(f'{path}text_features_{i}_drop_column_persons_influence_without{end}.csv', f'{path}embedding_{i}_persons_only_transcript{end}.csv', f'text_features_{i}_persons_srt_embed{end}.csv')
+                merge_df(f'{path}all_features_{i}_drop_column_persons_influence_without{end}.csv', f'{path}embedding_{i}_persons_only_transcript{end}.csv', f'all_features_{i}_persons_srt_embed{end}.csv')
+                merge_df(f'{path}multimedia_features_{i}_drop_column_persons_influence_without{end}.csv', f'{path}embedding_{i}_persons_only_transcript{end}.csv', f'multimedia_features_{i}_persons_srt_embed{end}.csv')
+                merge_df(f'{path}text_features_{i}_drop_column_persons_influence_without{end}.csv', f'{path}embedding_{i}_persons_only_transcript{end}.csv', f'text_features_{i}_persons_srt_embed{end}.csv')
             # average results
-            '''
-            merge_df(f'{path}all_features_{i}_drop_column_videos_influence_without{end}.csv', f'{path}embedding_{i}_videos_both_embd{end}.csv', f'all_features_{i}_videos_both_embed{end}.csv')
-            merge_df(f'{path}multimedia_features_{i}_drop_column_videos_influence_without{end}.csv', f'{path}embedding_{i}_videos_both_embd{end}.csv', f'multimedia_features_{i}_videos_both_embed{end}.csv')
-            merge_df(f'{path}text_features_{i}_drop_column_videos_influence_without{end}.csv', f'{path}embedding_{i}_videos_both_embd{end}.csv', f'text_features_{i}_videos_both_embed{end}.csv')
+            else:
+                merge_df(f'{path}all_features_{i}_drop_column_videos_influence_without{end}.csv', f'{path}embedding_{i}_videos_both_embd{end}.csv', f'all_features_{i}_videos_both_embed{end}.csv')
+                merge_df(f'{path}multimedia_features_{i}_drop_column_videos_influence_without{end}.csv', f'{path}embedding_{i}_videos_both_embd{end}.csv', f'multimedia_features_{i}_videos_both_embed{end}.csv')
+                merge_df(f'{path}text_features_{i}_drop_column_videos_influence_without{end}.csv', f'{path}embedding_{i}_videos_both_embd{end}.csv', f'text_features_{i}_videos_both_embed{end}.csv')
 
-            merge_df(f'{path}all_features_{i}_drop_column_videos_influence_without{end}.csv', f'{path}embedding_{i}_videos_only_slide{end}.csv', f'all_features_{i}_videos_slides_embed{end}.csv')
-            merge_df(f'{path}multimedia_features_{i}_drop_column_videos_influence_without{end}.csv', f'{path}embedding_{i}_videos_only_slide{end}.csv', f'multimedia_features_{i}_videos_slides_embed{end}.csv')
-            merge_df(f'{path}text_features_{i}_drop_column_videos_influence_without{end}.csv', f'{path}embedding_{i}_videos_only_slide{end}.csv', f'text_features_{i}_videos_slides_embed{end}.csv')
+                merge_df(f'{path}all_features_{i}_drop_column_videos_influence_without{end}.csv', f'{path}embedding_{i}_videos_only_slide{end}.csv', f'all_features_{i}_videos_slides_embed{end}.csv')
+                merge_df(f'{path}multimedia_features_{i}_drop_column_videos_influence_without{end}.csv', f'{path}embedding_{i}_videos_only_slide{end}.csv', f'multimedia_features_{i}_videos_slides_embed{end}.csv')
+                merge_df(f'{path}text_features_{i}_drop_column_videos_influence_without{end}.csv', f'{path}embedding_{i}_videos_only_slide{end}.csv', f'text_features_{i}_videos_slides_embed{end}.csv')
             
-            merge_df(f'{path}all_features_{i}_drop_column_videos_influence_without{end}.csv', f'{path}embedding_{i}_videos_only_transcript{end}.csv', f'all_features_{i}_videos_srt_embed{end}.csv')
-            merge_df(f'{path}multimedia_features_{i}_drop_column_videos_influence_without{end}.csv', f'{path}embedding_{i}_videos_only_transcript{end}.csv', f'multimedia_features_{i}_videos_srt_embed{end}.csv')
-            merge_df(f'{path}text_features_{i}_drop_column_videos_influence_without{end}.csv', f'{path}embedding_{i}_videos_only_transcript{end}.csv', f'text_features_{i}_videos_srt_embed{end}.csv')
+                merge_df(f'{path}all_features_{i}_drop_column_videos_influence_without{end}.csv', f'{path}embedding_{i}_videos_only_transcript{end}.csv', f'all_features_{i}_videos_srt_embed{end}.csv')
+                merge_df(f'{path}multimedia_features_{i}_drop_column_videos_influence_without{end}.csv', f'{path}embedding_{i}_videos_only_transcript{end}.csv', f'multimedia_features_{i}_videos_srt_embed{end}.csv')
+                merge_df(f'{path}text_features_{i}_drop_column_videos_influence_without{end}.csv', f'{path}embedding_{i}_videos_only_transcript{end}.csv', f'text_features_{i}_videos_srt_embed{end}.csv')

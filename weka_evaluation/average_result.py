@@ -43,7 +43,7 @@ def calculate_class_average(df, k):
     '''
 
     # get length of different feature classes
-    file_names = df.iloc[:,0].tolist()
+    file_names = df.iloc[:, 0].tolist()
     all_len = sum('all_features' in s for s in file_names)
     embd_len = sum('embedding' in s for s in file_names)
     multi_len = sum('multimedia_features' in s for s in file_names)
@@ -162,7 +162,6 @@ def visualize_result(x, precision, f1, name):
     plt.ylabel('avg precision in %')
     plt.xlim(0, np.amax(x) + 5)
     plt.ylim(0, 100)
-    #plt.xticks(np.arange(0, max(x) + 10, 25.0))
     plt.savefig('./generated_results/' + name + '_precision.png')
     plt.clf()
 
@@ -173,22 +172,18 @@ def visualize_result(x, precision, f1, name):
     plt.ylabel('avg f1-score in %')
     plt.xlim(0, np.amax(x) + 5)
     plt.ylim(0, 100)
-    #plt.xticks(np.arange(0, max(x) + 5, 25.0))
     plt.savefig('./generated_results/' + name + '_f1.png')
     plt.clf()
 
 
 def create_csv(low, std_low, moderate, std_moderate, high, std_high, averaged, std_averaged, fn):
     class_names = ['', '', '', '', 'Low', '', '', '', 'Moderate', '', '', '', 'High', '', '', '', 'Average']
-    #value_names = ['Key_Dataset', 'Percent_correct', 'Kappa_statistic', 'Mean_absolute_error', 'Root_mean_squared_error',
-    #         'Relative_absolute_error', 'Root_relative_squared_error', 'IR_precision', 'IR_recall', 'F_measure']
     value_names = ['Dataset', 'P', 'std P', 'R', 'std R', 'F1', 'std F1', 'P', 'std P', 'R', 'std R', 'F1', 'std F1',
                    'P', 'std P', 'R', 'std R', 'F1', 'std F1', 'P', 'std P', 'R', 'std R', 'F1', 'std F1',
                    'Percent_correct', 'std Percent_correct']
     csv = [class_names, value_names]
     for i in range(len(low)):
         # the standard derivation for the overall precision can be used from low, moderate or high (same values)
-        #print(std_low[i][1], std_moderate[i][1], std_high[i][1])
         row = np.round([low[i][7], std_low[i][7], low[i][8], std_low[i][8], low[i][9], std_low[i][9], moderate[i][7],
                         std_moderate[i][7], moderate[i][8], std_moderate[i][8], moderate[i][9], std_moderate[i][9],
                         high[i][7], std_high[i][7], high[i][8], std_high[i][8], high[i][9], std_high[i][9],
@@ -211,10 +206,6 @@ def calculate_average_values(df, k, fn):
 
     averaged, std_avg = calculate_predictor_average(low, moderate, high)
     create_csv(low, std_low, moderate, std_moderate, high, std_high, averaged, std_avg, fn)
-    #visualize_results(low, fn + '_low')
-    #visualize_results(moderate, fn + '_moderate')
-    #visualize_results(high, fn + '_high')
-    #visualize_results(averaged, fn + '_avg')
     return df
 
 
@@ -226,6 +217,8 @@ def main():
         print('no k-fold is needed because k is <= 1')
         return 0
 
+    if not os.path.exists('./generated_results/'):
+        os.makedirs('./generated_results/')
     # process all files
     files = glob.glob(''.join([path, '/*.csv']))
     for filepath in files:

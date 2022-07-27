@@ -35,6 +35,8 @@ def get_features():
     """ Starts the the program. Take all files and calculates the features for each file. After that the features are
     stored in a csv file.
     """
+    if not os.path.exists('./Features/'):
+        os.makedirs('./Features/')
     sta, cli = start_nlp()
     extract_text()
     slides = files.load_files('./Data/Slides-Processed')

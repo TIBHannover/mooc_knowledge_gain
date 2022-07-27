@@ -1,6 +1,6 @@
+import os
 import argparse
 from math import ceil
-# import numpy as np
 import pandas as pd
 import csv
 import numpy as np
@@ -8,15 +8,11 @@ import random
 import scipy
 from sklearn.model_selection import KFold, RepeatedKFold, StratifiedKFold
 from sklearn.preprocessing import MinMaxScaler
-# from sklearn.feature_selection import SelectFromModel, SelectKBest, chi2
-# from sklearn.naive_bayes import GaussianNB
-# from sklearn.svm import SVC
 from rfpimp import permutation_importances, dropcol_importances, oob_classifier_accuracy  # feature importance
 import shap  # feature importance
-# from sklearn.feature_selection import VarianceThreshold  # maybe helpful to remove non relevant features
 from sklearn.inspection import permutation_importance
 from sklearn.feature_selection import VarianceThreshold
-from sklearn.ensemble import RandomForestClassifier  # , ExtraTreesClassifier
+from sklearn.ensemble import RandomForestClassifier
 from copy import copy
 from sklearn.metrics import precision_recall_fscore_support, accuracy_score
 from statistics import mean
@@ -322,36 +318,34 @@ def create_filtered_sets_influence(name, fis, x_train, x_test, y_train, y_test, 
 def create_embedding_csvs(slide_embd_train, y_train, slide_embd_test, y_test, transcript_embd_train,
                           transcript_embd_test, k, data_method):
     nominal_to_num = {'Low': 0, 'Moderate': 1, 'High': 2}
+    folder = 'all' if data_method == 'persons' else 'avg'
     # only slide embedding
     pd.concat([slide_embd_train, y_train], axis=1).sort_values(by=['Knowledge_Gain_Level'],
-                                                               key=lambda x: x.map(nominal_to_num)).to_csv(''.join(
-        ['./feature_selection/pearson/train/embedding_', str(k + 1), '_', data_method, '_only_slide.csv']),
+                                                               key=lambda x: x.map(nominal_to_num)).to_csv(
+        f'./feature_selection/{folder}/train/embedding_{str(k + 1)}_{data_method}_only_slide.csv',
         index=False, encoding='utf-8', quoting=csv.QUOTE_NONNUMERIC)
     pd.concat([slide_embd_test, y_test], axis=1).sort_values(by=['Knowledge_Gain_Level'],
                                                              key=lambda x: x.map(nominal_to_num)).to_csv(
-        ''.join(
-            ['./feature_selection/pearson/test/embedding_', str(k + 1), '_', data_method, '_only_slide_test.csv']),
+        f'./feature_selection/{folder}/test/embedding_{k + 1}_{data_method}_only_slide_test.csv',
         index=False, encoding='utf-8', quoting=csv.QUOTE_NONNUMERIC)
     # only transcript embedding
     pd.concat([transcript_embd_train, y_train], axis=1).sort_values(by=['Knowledge_Gain_Level'],
-                                                                    key=lambda x: x.map(nominal_to_num)).to_csv(''.join(
-        ['./feature_selection/pearson/train/embedding_', str(k + 1), '_', data_method, '_only_transcript.csv']),
+                                                                    key=lambda x: x.map(nominal_to_num)).to_csv(
+        f'./feature_selection/{folder}/train/embedding_{k + 1}_{data_method}_only_transcript.csv',
         index=False, encoding='utf-8', quoting=csv.QUOTE_NONNUMERIC)
     pd.concat([transcript_embd_test, y_test], axis=1).sort_values(by=['Knowledge_Gain_Level'],
                                                                   key=lambda x: x.map(nominal_to_num)).to_csv(
-        ''.join(
-            ['./feature_selection/pearson/test/embedding_', str(k + 1), '_', data_method, '_only_transcript_test.csv']),
+        f'./feature_selection/{folder}/test/embedding_{k + 1}_{data_method}_only_transcript_test.csv',
         index=False, encoding='utf-8', quoting=csv.QUOTE_NONNUMERIC)
     # only both embeddings
     pd.concat(
         [slide_embd_train, transcript_embd_train.drop(list(transcript_embd_train.filter(regex='Person_ID')), axis=1),
-         y_train], axis=1).sort_values(by=['Knowledge_Gain_Level'], key=lambda x: x.map(nominal_to_num)).to_csv(''.join(
-        ['./feature_selection/pearson/train/embedding_', str(k + 1), '_', data_method, '_both_embd.csv']),
+         y_train], axis=1).sort_values(by=['Knowledge_Gain_Level'], key=lambda x: x.map(nominal_to_num)).to_csv(
+        f'./feature_selection/{folder}/train/embedding_{k + 1}_{data_method}_both_embd.csv',
         index=False, encoding='utf-8', quoting=csv.QUOTE_NONNUMERIC)
     pd.concat([slide_embd_test, transcript_embd_test.drop(list(transcript_embd_test.filter(regex='Person_ID')), axis=1),
                y_test], axis=1).sort_values(by=['Knowledge_Gain_Level'], key=lambda x: x.map(nominal_to_num)).to_csv(
-        ''.join(
-            ['./feature_selection/pearson/test/embedding_', str(k + 1), '_', data_method, '_both_embd_test.csv']),
+        f'./feature_selection/{folder}/test/embedding_{k + 1}_{data_method}_both_embd_test.csv',
         index=False, encoding='utf-8', quoting=csv.QUOTE_NONNUMERIC)
 
 
@@ -361,17 +355,14 @@ def store_filtered(name, filtered_train, y_train, filtered_test, y_test, specifi
     if 'Person_ID' in filtered_test:
         filtered_test = convert_person_id(filtered_test)
     nominal_to_num = {'Low': 0, 'Moderate': 1, 'High': 2}
+    folder = 'all' if data_method == 'persons' else 'avg'
     pd.concat([filtered_train, y_train], axis=1).sort_values(by=['Knowledge_Gain_Level'],
-                                                             key=lambda x: x.map(nominal_to_num)).to_csv(''.join(
-        ['./feature_selection/pearson/train/', name, '_', str(k + 1), '_', fi_method, '_', data_method, '_', specific,
-         '_without.csv']),
+                                                             key=lambda x: x.map(nominal_to_num)).to_csv(
+        f'./feature_selection/{folder}/train/{name}_{k + 1}_{fi_method}_{data_method}_{specific}_without.csv',
         index=False, encoding='utf-8', quoting=csv.QUOTE_NONNUMERIC)
     pd.concat([filtered_test, y_test], axis=1).sort_values(by=['Knowledge_Gain_Level'],
                                                            key=lambda x: x.map(nominal_to_num)).to_csv(
-        ''.join(
-            ['./feature_selection/pearson/test/', name, '_', str(k + 1), '_', fi_method, '_', data_method, '_',
-             specific,
-             '_without_test.csv']),
+        f'./feature_selection/{folder}/test/{name}_{k + 1}_{fi_method}_{data_method}_{specific}_without_test.csv',
         index=False, encoding='utf-8', quoting=csv.QUOTE_NONNUMERIC)
 
 
@@ -423,7 +414,6 @@ def embedding_split(k, slide_embd, transcript_embd):
 def avg_split(k, name, feature, filter_type, slide_embd, transcript_embd, non_relevant, importance_method):
     # randomly split data into train and test
     print(f'Split average of {name}')
-    #random.seed(1234)
     fis = []  # feature importances
     sets = []
     k_fold = StratifiedKFold(n_splits=k, shuffle=True, random_state=1234)
@@ -432,7 +422,6 @@ def avg_split(k, name, feature, filter_type, slide_embd, transcript_embd, non_re
         # sort videos into train and test
         x_train, x_test = copy(feature[0].iloc[train]), copy(feature[0].iloc[test])
         y_train, y_test = copy(feature[1].iloc[train]), copy(feature[1].iloc[test])
-        #print(train, test)
         # remove non relevant features
         non_relevant = ['Video_ID'] + non_relevant
         x_train = x_train.drop([column for column in non_relevant if column in x_train.columns], axis=1)
@@ -475,8 +464,6 @@ def avg_split(k, name, feature, filter_type, slide_embd, transcript_embd, non_re
 
 
 def data_split(k, name, feature, filter_type, slide_embd, transcript_embd, non_relevant, importance_method):
-    num_participants = 13
-    #person_cols = [f'Person_ID_{i + 1}' for i in range(num_participants)]
     k_fold = KFold(n_splits=5, random_state=1234, shuffle=True)
     video_ids = np.array(['1_2a', '1_2b', '1_2c', '1_2d', '1_3a', '1_3b', '1_3c', '2_2a', '2_2b', '2_2c',
                           '2_2d', '3_2b', '3_3a', '3_3b', '4_2a', '4_3a', '5_1a', '5_1b', '6_2a', '7_2b', '7_3a',
@@ -636,13 +623,36 @@ def video_kg_prediction(name, feature, avg_feature, mode='avg'):
     show_kg_prediction_stats(class_vals, overall, y_true, y_pred)
 
 
+def create_folders():
+    if not os.path.exists('./feature_selection'):
+        os.makedirs('./feature_selection')
+    if not os.path.exists('./feature_selection'):
+        os.makedirs('./feature_selection/feature_importance')
+    if not os.path.exists('./feature_selection/feature_importance'):
+        os.makedirs('./feature_selection/feature_importance')
+
+    if not os.path.exists('./feature_selection/all'):
+        os.makedirs('./feature_selection/all')
+    if not os.path.exists('./feature_selection/all/train'):
+        os.makedirs('./feature_selection/all/train')
+    if not os.path.exists('./feature_selection/all/test'):
+        os.makedirs('./feature_selection/all/test')
+
+    if not os.path.exists('./feature_selection/avg'):
+        os.makedirs('./feature_selection/avg')
+    if not os.path.exists('./feature_selection/avg/train'):
+        os.makedirs('./feature_selection/avg/train')
+    if not os.path.exists('./feature_selection/avg/test'):
+        os.makedirs('./feature_selection/avg/test')
+
+
 def main():
     args = parse_arguments()
     path = args.path
 
     # check if commands are correct
-    if args.method.lower() not in ['python', 'weka', 'avg_python', 'person_id', 'video_id1', 'video_id2', 'video_id3']:
-        print('The choosen method has to be python, avg_python, person_id or weka')
+    if args.method.lower() not in ['python', 'weka', 'avg_python', 'person_id', 'video_id1', 'video_id2']:
+        print('The choosen method has to be python, avg_python, person_id, video_id1, video_id2 or weka')
         return
     if args.filter.lower() not in ['amount', 'threshold', 'influence']:
         print('The choosen filter has to be amount, threshold or influence')
@@ -653,7 +663,7 @@ def main():
         return
 
     fi_method = args.feature_importance
-    print("run")
+    create_folders()
     if args.method.lower() == 'weka':
         print('Use weka method to get sets')
         all_features = preprocess_csv(''.join([path, 'all_features.csv']))
@@ -662,7 +672,6 @@ def main():
         create_csvs_weka(args.k_fold, 'all_features', all_features)
         create_csvs_weka(args.k_fold, 'text_features', text_features)
         create_csvs_weka(args.k_fold, 'multimedia_features', multimedia_features)
-
     elif args.method.lower() == 'python':
         print(f'Use python and the feature importance method "{args.feature_importance.lower()}" to get sets')
         all_features = preprocess_csv(''.join([path, 'all_features.csv']))

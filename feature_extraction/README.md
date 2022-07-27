@@ -15,7 +15,6 @@ pip install -r requirements.txt
 ```bash
 .
 ├── corenlp # Contains corenlp. If this folder does not exist it will be automatically downloaded
-├── csv-files # Contains csv-files and a py-file that merges them
 ├── Data # This folder contains the slides, transcripts and the test results
     ├── Slides # This folder contains the slides for the experiments
 		├── 1_2a.pdf
@@ -32,7 +31,9 @@ pip install -r requirements.txt
 		├── ...
 		├── 7_3c.srt
 ├── Features # This folder contains the results of the feature extraction
-		├── features.csv # only classic features (also contains video_id, person_id for a better overview)
+		├── all_features.csv # only classic features (also contains video_id, person_id for a better overview)
+        ├── text_features.csv # subset of all_features.csv, it contains only the text features (also contains video_id, person_id for a better overview)
+        ├── multimedia_features.csv # subset of all_features.csv, it contains only the multimedia features (also contains video_id, person_id for a better overview)
 		├── slide_embedding.csv # contains the average sentence embeddings for a presentation
 		├── transcript_embedding.csv #	contains the average sentence embeddings for a speech transcript
 ├── wordlists
@@ -49,7 +50,6 @@ pip install -r requirements.txt
 ├── files.py # loads and stores files
 ├── embedding.py # creates the embeddings and specific features about them
 ├── CompoundWordSplitter.py # Checks if word is a compound word
-├── requirements.txt
 └── README.md
 
 ```
