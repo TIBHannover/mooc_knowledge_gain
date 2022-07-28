@@ -47,3 +47,5 @@ Additionally, since the knowledge gain data from Shi et al. is used, please also
     series = {SALMM '19},
 }
 ```
+## LICENSE
+This work is published under the GNU GENERAL PUBLIC LICENSE Version 3, 29 June 2007. For details please check the LICENSE file in the repository.
