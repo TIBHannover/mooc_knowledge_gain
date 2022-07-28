@@ -1,3 +1,4 @@
+import os
 import files
 import sys
 import pre_processor
@@ -27,8 +28,8 @@ def extract_text():
 
     files.remove_files(files.load_files('./Data/Slides-Processed'))  # Removes previous converted files
     data = files.load_files('./Data/Slides')
-    for file in data:
-        files.process_pdf(file)
+    for f in data:
+        files.process_pdf(f)
 
 
 def get_features():
@@ -37,6 +38,8 @@ def get_features():
     """
     if not os.path.exists('./Features/'):
         os.makedirs('./Features/')
+    if not os.path.exists('./Data/Slides-Processed'):
+        os.makedirs('./Data/Slides-Processed')
     sta, cli = start_nlp()
     extract_text()
     slides = files.load_files('./Data/Slides-Processed')
